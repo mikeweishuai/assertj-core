@@ -1387,6 +1387,26 @@ public abstract class AbstractMapAssert<SELF extends AbstractMapAssert<SELF, ACT
     return containsExactlyForProxy(entries);
   }
 
+  /**
+   * Verifies that the {@link Map} is not modifiable.
+   * <p>
+   * Example:
+   * <pre><code class='java'>Map&lt;String, String&gt; map = new HashMap();
+   * map.put(&quot;key&quot;, &quot;value&quot;);
+   *
+   * assertThat(map).isUnmodifiable(); // should fail
+   *
+   * Map&lt;String, String&gt; unmodifiableMap = Collections.unmodifiableMap(map);
+   * assertThat(unmodifiableMap).isUnmodifiable(); // should succeed</code></pre>
+   * @return {@code this} assertion object
+   * @throws AssertionError if the actual map is {@code null}
+   * @throws AssertionError if the actual map is modifiable
+   */
+  public SELF isUnmodifiable() {
+    maps.assertUnmodifiable(info, actual);
+    return myself;
+  }
+
   // This method is protected in order to be proxied for SoftAssertions / Assumptions.
   // The public method for it (the one not ending with "ForProxy") is marked as final and annotated with @SafeVarargs
   // in order to avoid compiler warning in user code

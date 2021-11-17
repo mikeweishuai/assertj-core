@@ -22,6 +22,7 @@ import static org.assertj.core.error.ElementsShouldSatisfy.elementsShouldSatisfy
 import static org.assertj.core.error.NoElementsShouldSatisfy.noElementsShouldSatisfy;
 import static org.assertj.core.error.ShouldBeEmpty.shouldBeEmpty;
 import static org.assertj.core.error.ShouldBeNullOrEmpty.shouldBeNullOrEmpty;
+import static org.assertj.core.error.ShouldBeUnmodifiable.shouldBeUnmodifiable;
 import static org.assertj.core.error.ShouldContainAnyOf.shouldContainAnyOf;
 import static org.assertj.core.error.ShouldContainEntries.shouldContainEntries;
 import static org.assertj.core.error.ShouldContainEntry.shouldContainEntry;
@@ -54,14 +55,8 @@ import static org.assertj.core.util.IterableUtil.toArray;
 import static org.assertj.core.util.Preconditions.checkArgument;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -612,6 +607,47 @@ public class Maps {
   private <K, V> void failIfEntriesIsEmptySinceActualIsNotEmpty(AssertionInfo info, Map<K, V> actual,
                                                                 Entry<? extends K, ? extends V>[] entries) {
     if (entries.length == 0) throw failures.failure(info, shouldBeEmpty(actual));
+  }
+
+  /**
+   * Helper function for isUnmodifiable(). Verifies that the {@link Map} is not modifiable.
+   * @throws AssertionError if the actual map is {@code null}
+   * @throws AssertionError if the actual map is modifiable
+   * @param info Assertion information
+   * @param actual The actual object that be called
+   */
+  public void assertUnmodifiable(AssertionInfo info, Map<?, ?> actual) {
+    assertNotNull(info, actual);
+    expectUnsupportedOperationException(() -> actual.clear(), "Map.clear()", info);
+    expectUnsupportedOperationException(() -> actual.compute(null, (key, value) -> null), "Map.compute(null, (key, value) -> null)", info);
+    expectUnsupportedOperationException(() -> actual.computeIfAbsent(null, (key) -> null), "Map.computeIfAbsent(null, (key) -> null", info);
+    expectUnsupportedOperationException(() -> actual.computeIfPresent(null, (key, value) -> null), "Map.computeIfPresent(null, (key, value) -> null", info);
+    expectUnsupportedOperationException(() -> actual.merge(null, null, (key, value) -> null), "Map.merge(null, null, (key, value) -> null)", info);
+    expectUnsupportedOperationException(() -> actual.put(null, null), "Map.put(null, null)", info);
+    expectUnsupportedOperationException(() -> actual.putAll(null), "Map.putAll(null)", info);
+    expectUnsupportedOperationException(() -> actual.putIfAbsent(null, null), "Map.putIfAbsent(null, null)", info);
+    expectUnsupportedOperationException(() -> actual.replace(null, null), "Map.replace(null, null)", info);
+    expectUnsupportedOperationException(() -> actual.replace(null, null, null), "Map.replace(null, null, null)", info);
+    expectUnsupportedOperationException(() -> actual.remove(null), "Map.remove(null)", info);
+    expectUnsupportedOperationException(() -> actual.remove(null, null), "Map.remove(null, null)", info);
+    expectUnsupportedOperationException(() -> actual.replaceAll((key, value) -> null), "Map.replaceAll((key, value) -> null)", info);
+
+    if (actual instanceof NavigableMap) {
+      NavigableMap<?, ?> navigableMap = (NavigableMap<?, ?>) actual;
+      expectUnsupportedOperationException(() -> navigableMap.pollFirstEntry(), "NavigableMap.pollFirstEntry()", info);
+      expectUnsupportedOperationException(() -> navigableMap.pollLastEntry(), "NavigableMap.pollLastEntry()", info);
+    }
+  }
+
+  private void expectUnsupportedOperationException(Runnable runnable, String method, AssertionInfo info) {
+    try {
+      runnable.run();
+      throw failures.failure(info, shouldBeUnmodifiable(method));
+    } catch (UnsupportedOperationException e) {
+      // happy path
+    } catch (RuntimeException e) {
+      throw failures.failure(info, shouldBeUnmodifiable(method, e));
+    }
   }
 
 }
