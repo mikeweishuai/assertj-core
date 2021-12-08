@@ -162,6 +162,24 @@ public abstract class AbstractObjectArrayAssert<SELF extends AbstractObjectArray
   }
 
   /**
+   *  Verify that the given object contains exactly one element.
+   *  <p>
+   *  Example:
+   *  <pre><code class='java'> // assertion will pass
+   *  assertThat(new String[]{&quot;Manchester&quot;}).singleElement();
+   *
+   *  // assertion will fail
+   *  assertThat(new String[]{&quot;Manchester&quot;, &quot;Liverpool&quot;}).singleElement();
+   *
+   * @return the assertion on the first element
+   */
+  public SELF singleElement() {
+    arrays.assertNotEmpty(info, actual);
+    arrays.assertHasSize(info, actual, 1);
+    return myself;
+  }
+
+  /**
    * Verifies that the number of values in the actual array is greater than the given boundary.
    * <p>
    * Example:

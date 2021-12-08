@@ -36,16 +36,7 @@ import java.time.OffsetTime;
 import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalUnit;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
@@ -683,6 +674,31 @@ public class Assertions implements InstanceOfAssertFactories {
          ClassBasedNavigableIterableAssert<?, ACTUAL, ELEMENT, ELEMENT_ASSERT> assertThat(ACTUAL actual,
                                                                                           Class<ELEMENT_ASSERT> assertClass) {
            return AssertionsForInterfaceTypes.assertThat(actual, assertClass);
+  }
+
+  /**
+   * Creates a new instance of <code>{@link ClassBasedNavigableListAssert}</code> by transforming an object array into a list.
+   * Allowing navigate to any {@code ObjectArray} element in order to perform assertions on it.
+   * Example with {@code String} element assertions:
+   * <pre><code class='java'> String[] cities = new String[]{"Manchester"};
+   *
+   * // assertion succeeds with String assertions chained after singleElement()
+   * assertThat(cities, StringAssert.class).singleElement()
+   *                                        .startsWith("Man")
+   *                                        .endsWith("ter");</code></pre>
+   * @param actual The actual type
+   * @param assertClass The actual elements type
+   * @param <ACTUAL> The actual type
+   * @param <ELEMENT> The actual elements type
+   * @param <ELEMENT_ASSERT> The actual elements AbstractAssert type
+   * @return the created assertion object.
+   */
+  public static <ACTUAL extends Iterable<? extends ELEMENT>, ELEMENT, ELEMENT_ASSERT extends AbstractAssert<ELEMENT_ASSERT, ELEMENT>>
+  ClassBasedNavigableListAssert<?, List<? extends ELEMENT>, ELEMENT, ELEMENT_ASSERT> assertThat(ELEMENT[] actual,
+                                                                                   Class<ELEMENT_ASSERT> assertClass) {
+    List<ELEMENT> actual2 = new ArrayList<>();
+    Collections.addAll(actual2, actual);
+    return AssertionsForInterfaceTypes.assertThat(actual2, assertClass);
   }
 
   /**
